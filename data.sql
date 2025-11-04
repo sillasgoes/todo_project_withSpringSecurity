@@ -1,2 +1,2 @@
-CREATE USER 'admin'@'%' IDENTIFIED BY '123';
-GRANT ALL PRIVILEGES ON *.* TO 'admin'@'%' WITH GRANT OPTION;
+INSERT IGNORE INTO tb_role(role_id, name) VALUES (1, 'admin');
+INSERT IGNORE INTO tb_role(role_id, name) VALUES (2, 'basic');

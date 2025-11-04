@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Setter
@@ -16,11 +17,10 @@ import java.util.Set;
 @Table(name = "tb_user")
 public class User {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "user_id")
-    private long user_id;
+    private UUID user_id;
 
     @Column(unique = true)
     private String username;
