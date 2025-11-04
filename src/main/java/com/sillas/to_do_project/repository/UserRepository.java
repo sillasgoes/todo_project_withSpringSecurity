@@ -1,0 +1,10 @@
+package com.sillas.to_do_project.repository;
+
+import com.sillas.to_do_project.entities.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByName(String user);
+}
