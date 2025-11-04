@@ -7,9 +7,8 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(schema = "tb_role")
+@Table(name = "tb_role")
 public class Role {
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,6 +17,7 @@ public class Role {
 
     private String name;
 
+    @Getter
     public enum Values {
 
         ADMIN(1L),
@@ -29,11 +29,6 @@ public class Role {
             this.roleId = roleId;
         }
 
-        public long getRoleId() {
-            return roleId;
-        }
-
     }
-
 
 }
