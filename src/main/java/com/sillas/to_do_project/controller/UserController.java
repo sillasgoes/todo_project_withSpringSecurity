@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +27,7 @@ public class UserController {
     }
 
     @GetMapping("/users")
+    @PreAuthorize("hasAuthority('SCOPE_admin')")
     ResponseEntity<List<User>> findUsers(){
         List<User> users = userService.allUsers();
         return ResponseEntity.ok(users);
