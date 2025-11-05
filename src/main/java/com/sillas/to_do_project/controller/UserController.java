@@ -2,6 +2,7 @@ package com.sillas.to_do_project.controller;
 
 
 import com.sillas.to_do_project.controller.dto.NewUserDto;
+import com.sillas.to_do_project.controller.dto.UserDto;
 import com.sillas.to_do_project.entities.User;
 import com.sillas.to_do_project.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +29,8 @@ public class UserController {
 
     @GetMapping("/users")
     @PreAuthorize("hasAuthority('SCOPE_admin')")
-    ResponseEntity<List<User>> findUsers(){
-        List<User> users = userService.allUsers();
+    ResponseEntity<List<UserDto>> findUsers(){
+        List<UserDto> users = userService.allUsers();
         return ResponseEntity.ok(users);
     }
 

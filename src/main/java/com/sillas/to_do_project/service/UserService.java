@@ -3,24 +3,22 @@ package com.sillas.to_do_project.service;
 
 import com.sillas.to_do_project.controller.dto.NewUserDto;
 import com.sillas.to_do_project.controller.dto.UserDto;
-import com.sillas.to_do_project.entities.Role;
 import com.sillas.to_do_project.entities.User;
 import com.sillas.to_do_project.repository.RoleRepository;
 import com.sillas.to_do_project.repository.UserRepository;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Set;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Getter
 @Setter
 @Service
@@ -30,8 +28,12 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public List<User> allUsers() {
-        return userRepository.findAll();
+    public List<UserDto> allUsers() {
+        List<User> user = userRepository.findAll();
+        return user.stream()
+                .map(usuario -> new UserDto(usuario.getUser_id(),
+                usuario.getUsername(),
+                usuario.getRole())).toList();
     }
 
     public void newUser(NewUserDto dto) {
