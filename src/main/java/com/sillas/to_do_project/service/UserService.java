@@ -9,7 +9,6 @@ import com.sillas.to_do_project.repository.UserRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -62,11 +61,9 @@ public class UserService {
                 findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não cadastrado"));
 
-        UserDto dto = new UserDto(
+        return new UserDto(
                 user.getUser_id(),
                 user.getUsername(),
                 user.getRole());
-
-        return dto;
     }
 }
