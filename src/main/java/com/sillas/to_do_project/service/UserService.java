@@ -51,7 +51,6 @@ public class UserService {
                              newUser.setPassword(passwordEncoder.encode(dto.password()));
                          });
 
-       System.out.println("Chegou dentro do service com os dados" + newUser);
          userRepository.save(newUser);
     }
 

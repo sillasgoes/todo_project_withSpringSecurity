@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -17,7 +17,7 @@ public class TokenController {
     private final TokenService tokenService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestParam LoginRequest request) throws BadRequestException {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) throws BadRequestException {
         var loginResponse = tokenService.token(request);
         return ResponseEntity.ok(loginResponse);
     }
