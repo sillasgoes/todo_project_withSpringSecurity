@@ -1,13 +1,18 @@
 package com.sillas.to_do_project.service;
 
-import com.sillas.to_do_project.controller.dto.TaskDto;
-import com.sillas.to_do_project.controller.dto.UserDto;
-import com.sillas.to_do_project.controller.dto.UsernameDto;
+import com.sillas.to_do_project.controller.dto.*;
 import com.sillas.to_do_project.entities.Task;
 import com.sillas.to_do_project.repository.TaskRepository;
 import com.sillas.to_do_project.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.filters.ExpiresFilter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.querydsl.QPageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -45,8 +50,6 @@ public class TaskService {
 
         var task = taskRepository.findByUser(dbUser);
 
-        System.out.println("Chegou aqui 12212" + dbUser + task);
-
         return task.stream().map(tTask -> {
             return new TaskDto(
               tTask.getTask_id(),
@@ -74,5 +77,30 @@ public class TaskService {
                             task.getTaskStatus(),
                             task.getCreationTimestamp());
                 }).toList();
+    }
+
+    public FeedTaskDto feedTask(UUID user_id, int page, int pageSize){
+
+        var userDb = userRepository.findById(user_id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Pageable pageable = PageRequest.of(
+                page,
+                pageSize,
+                Sort.Direction.DESC,
+                "creationTimestamp");
+
+        var feed = taskRepository.findByUser(userDb, pageable)
+                .map(user -> new FeedItemTaskDto(
+                        user.getContent(),
+                        user.getTaskStatus(),
+                        user.getCreationTimestamp()));
+
+        var feedTest = taskRepository.findByUser(userDb);
+
+        return new FeedTaskDto(feed.getContent(),
+                page,
+                pageSize,
+                feed.getTotalPages(),
+                feed.getTotalElements());
     }
 }
