@@ -15,13 +15,16 @@ public class Task {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private String task_id;
+    private Long task_id;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
     private String content;
+
+    @Enumerated(EnumType.STRING)
+    private Status taskStatus;
 
     @CreationTimestamp
     private Instant creationTimestamp;

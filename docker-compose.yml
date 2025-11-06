@@ -8,5 +8,5 @@ services:
     environment:
       - MYSQL_USER=admin
       - MYSQL_PASSWORD=12345
-      - MYSQL_DATABASE=mydbtodo
+      - MYSQL_DATABASE=mydbtodo1
       - MYSQL_ROOT_PASSWORD=123

@@ -6,12 +6,14 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Set;
 import java.util.UUID;
 
 @Entity
+@ToString
 @Setter
 @Getter
 @Table(name = "tb_user")
