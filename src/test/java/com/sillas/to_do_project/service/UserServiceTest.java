@@ -3,8 +3,10 @@ package com.sillas.to_do_project.service;
 import com.sillas.to_do_project.controller.dto.NewUserDto;
 import com.sillas.to_do_project.entities.Role;
 import com.sillas.to_do_project.entities.User;
+import com.sillas.to_do_project.entities.factory.UserFactory;
 import com.sillas.to_do_project.repository.RoleRepository;
 import com.sillas.to_do_project.repository.UserRepository;
+import com.sillas.to_do_project.service.exception.UserNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,13 +17,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.assertArg;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.*;
@@ -36,13 +37,28 @@ class UserServiceTest {
     @Mock
     BCryptPasswordEncoder passwordEncoder;
     @Mock
-    User newUser;
+    UserFactory userFactory;
 
     @InjectMocks
     UserService userService;
 
     @Captor
     private ArgumentCaptor<User> userCaptor;
+
+    @Captor
+    private ArgumentCaptor<String> strReturn;
+
+    /**
+     * Estrutura básicas de testes: Mock de todas as dependências externas da classe
+     * Injetar dentro da classe a ser testada com @InjectMocks
+     * Estrutura de organização dos testes com @Nested na classe a ser testada, dentro dela
+     * seus respetivos testes, sempre identificando o nome claramente com o que o teste se
+     * proproe: Should Crete User with success
+     * Atraves dos testes você perceber falhas de construção do seu código como ex: Acoplação
+     * de dependências instânciadas dentro da própria classe: New User. Sempre use depências
+     * instanciadas dentro do construtor, isso vai facilitar o mock dessa informação na hora
+     * teste
+     */
 
     @Nested
     class newUser {
@@ -66,17 +82,35 @@ class UserServiceTest {
             doReturn(role).when(roleRepository).findByName("admin");
             doReturn(Optional.of(role2)).when(roleRepository).findById(2L);
             doReturn(Optional.empty()).when(userRepository).findByUsername(newDto.username());
-            when(userRepository.save(any(User.class))).thenReturn(user);
+            doReturn(user).when(userFactory).create(any(), any(), anySet());
+            doReturn(user).when(userRepository).save(userCaptor.capture());
 
-            //Act: executar o método a ser testado
+            //- Act: executar o método
+
             var result = userService.newUser(newDto);
 
             //Assert: verificar o resultado
             verify(userRepository, times(1)).save(userCaptor.capture());
             assertEquals(result.username(), userCaptor.getValue().getUsername());
-            //assertEquals(result.user_id(), userCaptor.getValue().getUser_id());
+            assertEquals(result.user_id(), userCaptor.getValue().getUser_id());
             assertEquals(result.role(), userCaptor.getValue().getRole());
 
+        }
+
+        @Test
+        @DisplayName("Should Throw exception if user not found")
+        void shouldThrowExceptionIfUserNotFound(){
+            //Arranger
+            var str = "sillas";
+            doReturn(Optional.empty()).when(userRepository).findByUsername(strReturn.capture());
+
+            //Act -
+            //Assert
+            assertThrowsExactly(UserNotFoundException.class, () -> {
+                userService.findUser(strReturn.capture());
+            });
+
+            verify(userRepository, times(1)).findByUsername(any());
         }
     }
 
