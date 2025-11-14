@@ -4,17 +4,15 @@ import com.sillas.to_do_project.controller.dto.*;
 import com.sillas.to_do_project.entities.Task;
 import com.sillas.to_do_project.repository.TaskRepository;
 import com.sillas.to_do_project.repository.UserRepository;
+import com.sillas.to_do_project.service.exception.TaskIsEmptyException;
+import com.sillas.to_do_project.service.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.filters.ExpiresFilter;
-import org.springframework.data.domain.Page;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.querydsl.QPageRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,14 +23,16 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
+    private static final Logger LOGGER =  LoggerFactory.getLogger(TaskService.class);
+
 
     public void addTask(String content, UUID user){
-
+        LOGGER.info("Adding task{}User: {}", content, user);
         var userT = userRepository.findById(user)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new UserNotFoundException(user.toString()));
 
         if(content.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NO_CONTENT);
+            throw new TaskIsEmptyException();
         }
 
         Task newTask = new Task();
@@ -41,14 +41,16 @@ public class TaskService {
         newTask.setTaskStatus(Task.Status.OPEN);
 
         taskRepository.save(newTask);
+        LOGGER.info("Task added: {}", newTask);
     }
 
     public List<TaskDto> listTaskUser(UUID user_id) {
-
+        LOGGER.info("Listing tasks by user: {}", user_id);
         var dbUser = userRepository.findById(user_id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new UserNotFoundException(user_id.toString()));
 
         var task = taskRepository.findByUser(dbUser);
+
 
         return task.stream().map(tTask -> {
             return new TaskDto(
@@ -64,7 +66,7 @@ public class TaskService {
     }
 
     public List<TaskDto> listAllTasks() {
-
+        LOGGER.info("Listing all tasks");
         return taskRepository.findAll().stream().map(
                 (task) -> {
                     return new TaskDto(
@@ -80,9 +82,9 @@ public class TaskService {
     }
 
     public FeedTaskDto feedTask(UUID user_id, int page, int pageSize){
-
+        LOGGER.info("Feeding tasks by user: {}", user_id);
         var userDb = userRepository.findById(user_id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new UserNotFoundException(user_id.toString()));
         Pageable pageable = PageRequest.of(
                 page,
                 pageSize,

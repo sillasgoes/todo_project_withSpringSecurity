@@ -48,7 +48,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST,
                                         "/newtask",
                                         "/login",
-                                        "/newUser").permitAll()
+                                        "/newuser").permitAll()
                                 .requestMatchers(HttpMethod.GET,
                                         "/users",
                                         "/tasks").permitAll()

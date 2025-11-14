@@ -6,16 +6,19 @@ import com.sillas.to_do_project.controller.dto.UserDto;
 import com.sillas.to_do_project.entities.User;
 import com.sillas.to_do_project.repository.RoleRepository;
 import com.sillas.to_do_project.repository.UserRepository;
+import com.sillas.to_do_project.service.exception.UserAlreadyRegisteredException;
+import com.sillas.to_do_project.service.exception.UserNotFoundException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.springframework.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Set;
+
 
 @RequiredArgsConstructor
 @Getter
@@ -26,40 +29,61 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class.getName());
 
     public List<UserDto> allUsers() {
         List<User> user = userRepository.findAll();
+
+        LOGGER.info("Getting all users...{}",  user);
         return user.stream()
                 .map(usuario -> new UserDto(usuario.getUser_id(),
                 usuario.getUsername(),
                 usuario.getRole())).toList();
     }
 
-    public void newUser(NewUserDto dto) {
-
-        User newUser = new User();
+    public UserDto newUser(NewUserDto dto) {
+        LOGGER.info("Creating user: {}", dto);
         var admin = roleRepository.findByName("admin");
         var basic = roleRepository.findById(2L).orElseThrow();
 
-         userRepository.findByUsername(dto.username()).
-                 ifPresentOrElse(
-                         (u) -> {
-                             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
-                         },
-                         () -> {
-                             newUser.setUsername(dto.username());
-                             newUser.setRole(Set.of(admin, basic));
-                             newUser.setPassword(passwordEncoder.encode(dto.password()));
-                         });
+//         userRepository.findByUsername(dto.username()).
+//                 ifPresentOrElse(
+//                         (u) -> {
+//                             LOGGER.info("User already registered {}", dto.username());
+//                             throw new UserAlreadyRegisteredException(u.getUsername());
+//                         },
+//                         () -> {
+//                             newUser.setUsername(dto.username());
+//                             newUser.setRole(Set.of(admin, basic));
+//                             newUser.setPassword(passwordEncoder.encode(dto.password()));
+//                             LOGGER.info("A new user is being created. {}", dto.username());
+//                         });
 
-         userRepository.save(newUser);
+        userRepository.findByUsername(dto.username())
+                .ifPresent(usuario -> {
+            LOGGER.info("User already registered {}", dto.username());
+            throw new UserAlreadyRegisteredException(usuario.getUsername());
+        });
+
+         var result = userRepository.save(
+                 User.builder()
+                 .username(dto.username())
+                 .password(dto.password())
+                 .build()
+         );
+
+         var newUserDto = new UserDto(result.getUser_id(), result.getUsername(), result.getRole());
+
+         LOGGER.info("Created user: {}", dto.username());
+
+         return newUserDto;
     }
 
     public UserDto findUser(String username){
-
+        LOGGER.info("Finding user by username: {}", username);
         User user = userRepository.
                 findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não cadastrado"));
+                .orElseThrow(() -> new UserNotFoundException(username));
 
         return new UserDto(
                 user.getUser_id(),

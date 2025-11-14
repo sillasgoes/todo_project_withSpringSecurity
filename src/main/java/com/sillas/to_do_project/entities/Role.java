@@ -1,13 +1,15 @@
 package com.sillas.to_do_project.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+@Builder
 @Entity
 @Getter
 @Setter
 @Table(name = "tb_role")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Role {
 
     @Id
